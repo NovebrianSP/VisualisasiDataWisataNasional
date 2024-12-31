@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Rekomendasi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Hasil Rekomendasi</h1>
+
+        <!-- Peta Lokasi -->
+        <div class="mt-4">
+            <h2 class="text-center">Peta Lokasi</h2>
+            <div class="my-4" id="map-container">
+                <!-- Embed the generated map -->
+                <iframe src="/map.html" style="width: 100%; height: 500px; border: none;"></iframe>
+            </div>
+        </div>
+
+        <!-- Detail Tempat Wisata -->
+        <div class="mt-4">
+            <h2 class="text-center">Detail Tempat Wisata</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nama Tempat</th>
+                        <th>Kategori</th>
+                        <th>Kota</th>
+                        <th>Rating</th>
+                        <th>Deskripsi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data %}
+                        {% for place in data %}
+                        <tr>
+                            <td>{{ place.place_name }}</td>
+                            <td>{{ place.category }}</td>
+                            <td>{{ place.city }}</td>
+                            <td>{{ place.rating / 10 }}</td>
+                            <td>{{ place.description }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">Tidak ada hasil yang ditemukan.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-secondary">Kembali</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
