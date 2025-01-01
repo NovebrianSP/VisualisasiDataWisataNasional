@@ -45,7 +45,6 @@ def preprocess_data(input_file, output_file):
     # Save preprocessed data to a new CSV file
     data.to_csv(output_file, index=False)
 
-# Example usage
 input_file = 'destinasi-wisata-indonesia.csv'  # Replace with the actual file path
 output_file = 'preprocessed-destinasi-wisata-indonesia.csv'  # Replace with the desired output file path
 preprocess_data(input_file, output_file)

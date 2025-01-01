@@ -1,40 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekomendasi Tempat Wisata</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center">Cari Rekomendasi Tempat Wisata</h1>
-        <form action="/recommend" method="POST" class="mt-4">
-            <!-- Input Deskripsi -->
-            <div class="mb-3">
-                <label for="description" class="form-label">Deskripsi Tempat</label>
-                <input type="text" class="form-control" id="description" name="description" placeholder="Contoh: pantai, taman, budaya">
-            </div>
-            <!-- Input Kota -->
-            <div class="mb-3">
-                <label for="city" class="form-label">Kota</label>
-                <select class="form-select" id="city" name="city">
-                    <option value="">Pilih Kota</option>
-                    {% for city in cities %}
-                        <option value="{{ city }}">{{ city }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <!-- Input Harga -->
-            <div class="mb-3">
-                <label for="price" class="form-label">Harga Maksimal</label>
-                <input type="number" class="form-control" id="price" name="price" placeholder="Contoh: 500000" min="0">
-            </div>
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary w-100">Cari Rekomendasi</button>
-        </form>
-    </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cari Rekomendasi Tempat Wisata</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style/style.css') }}"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
 
+  <body style="background-color: cadetblue;">
+    <div class="container mt-5">
+      <h1 class="text-center">Cari Rekomendasi Tempat Wisata</h1>
+      <div class="card-container">
+        <div class="card">
+          <div class="card-body">
+            <form action="/recommend" method="POST" class="mt-4">
+              <!-- Input Deskripsi -->
+              <div class="mb-5">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="description"
+                  name="description"
+                  placeholder="Deskripsi Tempat Wisata Yang Ingin Dikunjungi"
+                />
+              </div>
+              <!-- Dropdown Kota -->
+              <div class="mb-5">
+                <select class="form-select" id="city" name="city">
+                  <option value="">Pilih Kota Tujuan</option>
+                  {% for kota in cities %}
+                  <option value="{{ kota }}">{{ kota }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <!-- Input Harga -->
+              <div class="mb-5">
+                <input
+                  type="number"
+                  class="form-control"
+                  id="price"
+                  name="price"
+                  placeholder="Maximum Harga"
+                  min="0"
+                  step="5000"
+                />
+              </div>
+              <!-- Tombol Submit -->
+              <button type="submit" class="btn btn-primary w-100">
+                Cari Rekomendasi
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <p>Ingin Melakukan Check Data? Silahkan Cek</p>
+        <a href="/dashboard" class="btn btn-slide">Dashboard Data Yang Tercatat Pada Dataset Kami</a>
+      </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+  </body>
 </html>
