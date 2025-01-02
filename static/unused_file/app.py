@@ -3,13 +3,17 @@ import pandas as pd
 import folium
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend
+import matplotlib.pyplot as plt
+import seaborn as sns
+import io
+import base64
 import re
 import json
 
 app = Flask(__name__)
 
 # Load preprocessed data
-data = pd.read_csv('destinasi-wisata-indonesia-processed.csv')
+data = pd.read_csv('preprocessed-destinasi-wisata-indonesia.csv')
 
 # Extract unique cities for dropdown
 cities = sorted(data['city'].unique())
