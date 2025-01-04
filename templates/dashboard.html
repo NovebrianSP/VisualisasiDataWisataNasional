@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link
       rel="stylesheet"
@@ -36,7 +38,6 @@
         <h2>Peta Destinasi Wisata</h2>
         <iframe src="{{ map_path }}" width="100%" height="500px"></iframe>
 
-        <!-- Baris untuk Pie Chart -->
         <div class="chart-row">
             <div class="chart-container">
                 <h3>Jumlah Wisata Berdasarkan Kategori</h3>
@@ -46,29 +47,20 @@
                 <h3>Jumlah Wisata Berdasarkan Kota</h3>
                 <canvas id="cityChart"></canvas>
             </div>
-            <div class="chart-container">
-                <h3>Jumlah Wisata Berdasarkan Rentang Harga</h3>
-                <canvas id="priceChart"></canvas>
-            </div>
         </div>
 
-        <!-- Baris untuk Chart Bar -->
+        <div class="chart-container chart-full">
+            <h3>Jumlah Wisata Berdasarkan Rentang Harga</h3>
+            <canvas id="priceChart"></canvas>
+        </div>
+
         <div class="chart-container chart-full">
             <h3>Kategori Wisata pada Tiap Kota</h3>
             <canvas id="categoryCityChart"></canvas>
         </div>
 
-        <!-- Baris tambahan untuk data baru -->
         <div class="chart-container chart-full">
-            <h3>Nama Destinasi Berdasarkan Kategori</h3>
-            <canvas id="destinationsByCategoryChart"></canvas>
-        </div>
-        <div class="chart-container chart-full">
-            <h3>Nama Destinasi Berdasarkan Kota</h3>
-            <canvas id="destinationsByCityChart"></canvas>
-        </div>
-        <div class="chart-container chart-full">
-            <h3>Kategori dengan Rating Terbanyak</h3>
+            <h3>Rata-rata Rating per Kategori</h3>
             <canvas id="topRatedCategoriesChart"></canvas>
         </div>
         <div class="chart-container chart-full">
@@ -83,7 +75,7 @@
     </div>
 
     <script>
-        // Data untuk Category Chart
+        // Pie Chart - Jumlah Wisata Berdasarkan Kategori
         const categoryLabels = JSON.parse('{{ category_labels | safe }}');
         const categoryValues = JSON.parse('{{ category_values | safe }}');
         const categoryCtx = document.getElementById('categoryChart').getContext('2d');
@@ -99,10 +91,21 @@
             },
             options: {
                 responsive: true,
-            }
+                plugins: {
+                    datalabels: {
+                        color: '#000',
+                        formatter: (value, ctx) => {
+                            const total = ctx.chart.data.datasets[0].data.reduce((acc, val) => acc + val, 0);
+                            const percentage = ((value / total) * 100).toFixed(2) + '%';
+                            return percentage;
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
         });
 
-        // Data untuk City Chart
+        // Pie Chart - Jumlah Wisata Berdasarkan Kota
         const cityLabels = JSON.parse('{{ city_labels | safe }}');
         const cityValues = JSON.parse('{{ city_values | safe }}');
         const cityCtx = document.getElementById('cityChart').getContext('2d');
@@ -118,37 +121,69 @@
             },
             options: {
                 responsive: true,
-            }
+                plugins: {
+                    datalabels: {
+                        color: '#000',
+                        formatter: (value, ctx) => {
+                            const total = ctx.chart.data.datasets[0].data.reduce((acc, val) => acc + val, 0);
+                            const percentage = ((value / total) * 100).toFixed(2) + '%';
+                            return percentage;
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
         });
 
-        // Data untuk Price Chart
+        // Line Chart - Jumlah Wisata Berdasarkan Rentang Harga
         const priceLabels = JSON.parse('{{ price_labels | safe }}');
         const priceValues = JSON.parse('{{ price_values | safe }}');
         const priceCtx = document.getElementById('priceChart').getContext('2d');
         new Chart(priceCtx, {
-            type: 'pie',
+            type: 'line',
             data: {
                 labels: priceLabels,
                 datasets: [{
                     label: 'Jumlah Wisata',
                     data: priceValues,
-                    backgroundColor: priceLabels.map(() => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
                 }]
             },
             options: {
                 responsive: true,
-            }
+                plugins: {
+                    datalabels: {
+                        color: '#000',
+                        formatter: (value) => value
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            },
+            plugins: [ChartDataLabels]
         });
 
         // Data untuk Category per Kota Chart
         const cityCategoryLabels = JSON.parse('{{ city_category_labels | safe }}');
         const categoryPerCityLabels = JSON.parse('{{ category_per_city_labels | safe }}');
         const categoryPerCityValues = JSON.parse('{{ category_per_city_values | safe }}');
+
+        // Define fixed colors for each category
+        const fixedColors = [
+            'rgba(255, 99, 132, 0.6)', // Red
+            'rgba(54, 162, 235, 0.6)', // Blue
+            'rgba(75, 192, 192, 0.6)', // Green
+            'rgba(153, 102, 255, 0.6)', // Purple
+            'rgba(255, 159, 64, 0.6)', // Orange
+        ];
+
         const datasets = categoryPerCityLabels.map((label, index) => ({
             label: label,
             data: categoryPerCityValues.map(row => row[index]),
-            backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`,
+            backgroundColor: fixedColors[index % fixedColors.length], // Use fixed colors
         }));
+
         const categoryCityCtx = document.getElementById('categoryCityChart').getContext('2d');
         new Chart(categoryCityCtx, {
             type: 'bar',
@@ -170,162 +205,84 @@
             }
         });
 
-        // Data untuk Destinasi Berdasarkan Kategori
-    const destinationsByCategory = JSON.parse('{{ destinations_per_category | safe }}');
-    const destinationsByCategoryLabels = Object.keys(destinationsByCategory);
-    const destinationsByCategoryValues = Object.values(destinationsByCategory).map(destinations => destinations.length);
+        // Bar Chart - Rata-rata Rating per Kategori
+        const topRatedCategories = JSON.parse('{{ top_rating_category | safe }}');
+        const topRatedCategoriesLabels = Object.keys(topRatedCategories);
+        const topRatedCategoriesValues = Object.values(topRatedCategories);
+        const topRatedCategoriesCtx = document.getElementById('topRatedCategoriesChart').getContext('2d');
+        new Chart(topRatedCategoriesCtx, {
+            type: 'bar',
+            data: {
+                labels: topRatedCategoriesLabels,
+                datasets: [{
+                    label: 'Rata-rata Rating',
+                    data: topRatedCategoriesValues,
+                    backgroundColor: topRatedCategoriesLabels.map(() => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`),
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    datalabels: {
+                        color: '#000',
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => value.toFixed(2)
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
 
-    const destinationsByCategoryCtx = document.getElementById('destinationsByCategoryChart').getContext('2d');
-    new Chart(destinationsByCategoryCtx, {
-        type: 'line',
-        data: {
-            labels: destinationsByCategoryLabels,
-            datasets: [{
-                label: 'Jumlah Destinasi',
-                data: destinationsByCategoryValues,
-                backgroundColor: `rgba(54, 162, 235, 0.6)`
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        afterLabel: function (context) {
-                            const category = context.label;
-                            return `\nDestinations: ${destinationsByCategory[category].join(", ")}`;
+        // Data untuk Destinasi dengan Rating Tertinggi per Kota
+        const topRatedDestinationsByCity = JSON.parse('{{ top_rated_destinations_per_city | safe }}');
+        const topRatedDestinationsByCityLabels = topRatedDestinationsByCity.map(dest => dest.city);
+        const topRatedDestinationsByCityValues = topRatedDestinationsByCity.map(dest => dest.rating);
+        const topRatedDestinationsByCityNames = topRatedDestinationsByCity.map(dest => dest.place_name);
+
+        const topRatedDestinationsByCityCtx = document.getElementById('topRatedDestinationsByCityChart').getContext('2d');
+        new Chart(topRatedDestinationsByCityCtx, {
+            type: 'bar',
+            data: {
+                labels: topRatedDestinationsByCityLabels,
+                datasets: [{
+                    label: 'Rating Tertinggi',
+                    data: topRatedDestinationsByCityValues,
+                    backgroundColor: `rgba(255, 159, 64, 0.6)`
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function (context) {
+                                const index = context.dataIndex;
+                                return `\nDestinasi: ${topRatedDestinationsByCityNames[index]}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Rating'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Kota'
                         }
                     }
                 }
             }
-        }
-    });
-
-    // Data untuk Destinasi Berdasarkan Kota
-    const destinationsByCity = JSON.parse('{{ destinations_per_city | safe }}');
-    const destinationsByCityLabels = Object.keys(destinationsByCity);
-    const destinationsByCityValues = Object.values(destinationsByCity).map(destinations => destinations.length);
-
-    const destinationsByCityCtx = document.getElementById('destinationsByCityChart').getContext('2d');
-    new Chart(destinationsByCityCtx, {
-        type: 'line',
-        data: {
-            labels: destinationsByCityLabels,
-            datasets: [{
-                label: 'Jumlah Destinasi',
-                data: destinationsByCityValues,
-                backgroundColor: `rgba(75, 192, 192, 0.6)`
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        afterLabel: function (context) {
-                            const city = context.label;
-                            return `\nDestinations: ${destinationsByCity[city].join(", ")}`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-        // Data untuk Kategori dengan Rating Tertinggi
-const topRatedCategories = JSON.parse('{{ top_rating_category | safe }}');
-const topRatedCategoriesLabels = Object.keys(topRatedCategories);
-const topRatedCategoriesValues = Object.values(topRatedCategories);
-
-const topRatedCategoriesCtx = document.getElementById('topRatedCategoriesChart').getContext('2d');
-new Chart(topRatedCategoriesCtx, {
-    type: 'bar',
-    data: {
-        labels: topRatedCategoriesLabels,
-        datasets: [{
-            label: 'Rata-rata Rating',
-            data: topRatedCategoriesValues,
-            backgroundColor: topRatedCategoriesLabels.map(() => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`),
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: function (context) {
-                        return `${context.label}: ${context.raw.toFixed(2)} / 10`;
-                    }
-                }
-            },
-            legend: {
-                display: false,
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Rata-rata Rating'
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Kategori'
-                }
-            }
-        }
-    }
-});
-
-// Data untuk Destinasi dengan Rating Tertinggi per Kota
-const topRatedDestinationsByCity = JSON.parse('{{ top_rated_destinations_per_city | safe }}');
-const topRatedDestinationsByCityLabels = topRatedDestinationsByCity.map(dest => dest.city);
-const topRatedDestinationsByCityValues = topRatedDestinationsByCity.map(dest => dest.rating);
-const topRatedDestinationsByCityNames = topRatedDestinationsByCity.map(dest => dest.place_name);
-
-const topRatedDestinationsByCityCtx = document.getElementById('topRatedDestinationsByCityChart').getContext('2d');
-new Chart(topRatedDestinationsByCityCtx, {
-    type: 'bar',
-    data: {
-        labels: topRatedDestinationsByCityLabels,
-        datasets: [{
-            label: 'Rating Tertinggi',
-            data: topRatedDestinationsByCityValues,
-            backgroundColor: `rgba(255, 159, 64, 0.6)`
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    afterLabel: function (context) {
-                        const index = context.dataIndex;
-                        return `\nDestinasi: ${topRatedDestinationsByCityNames[index]}`;
-                    }
-                }
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Rating'
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Kota'
-                }
-            }
-        }
-    }
-});
+        });
     </script>
 </body>
 </html>

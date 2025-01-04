@@ -141,9 +141,8 @@ def prepare_chart_data():
     city_values = city_counts.values.tolist()
 
     # Data untuk chart harga
-    price_bins = pd.cut(data['price'], bins=5)
-    price_counts = price_bins.value_counts()
-    price_labels = [str(interval) for interval in price_counts.index]
+    price_counts = data['price'].value_counts().sort_index()
+    price_labels = price_counts.index.tolist()
     price_values = price_counts.values.tolist()
 
     # Data untuk chart rating
